@@ -597,6 +597,39 @@
       .proj-card { width: 270px; height: 230px; }
       .offer-section .btn { width: 100%; padding: 18px 20px; }
     }
+    /* ── Form validation styles ── */
+    .field-wrap { position: relative; margin-bottom: 18px; }
+    .field-wrap input, .field-wrap textarea, .field-wrap select { margin-bottom: 0; }
+    .field-err {
+      display: none;
+      font-size: 0.78rem; color: #ff7b7b;
+      padding: 5px 12px 0; font-weight: 500;
+    }
+    .field-wrap.invalid input,
+    .field-wrap.invalid textarea,
+    .field-wrap.invalid select {
+      border-color: #ff5555;
+      box-shadow: 0 0 0 3px rgba(255,85,85,0.15);
+    }
+    .field-wrap.invalid .field-err { display: block; }
+    .field-wrap.valid input,
+    .field-wrap.valid textarea,
+    .field-wrap.valid select {
+      border-color: #3ecf72;
+      box-shadow: 0 0 0 3px rgba(62,207,114,0.12);
+    }
+
+    /* form-row inside field-wraps */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+    #submitBtn:disabled { opacity: 0.65; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+    @keyframes popIn {
+      0%   { opacity: 0; transform: scale(0.4); }
+      70%  { transform: scale(1.12); }
+      100% { opacity: 1; transform: scale(1); }
+    }
   </style>
 </head>
 <body>
@@ -882,27 +915,63 @@
       <h2 class="section-title">Connect with<br><span class="gd-blue">GrowVantaTech</span></h2>
       <div style="height:40px"></div>
       <div class="contact-grid">
-        <div class="contact-form">
+        <form class="contact-form" id="contactForm" novalidate>
           <h3>Start a Conversation</h3>
           <p class="sub">We reply within 4 hours · No spam, ever.</p>
+
+          <!-- Status banner -->
+          <div id="formStatus" style="display:none; padding:14px 20px; border-radius:16px; margin-bottom:22px; font-size:0.9rem; font-weight:500;"></div>
+
           <div class="form-row">
-            <input type="text" placeholder="Full Name *">
-            <input type="email" placeholder="Business Email *">
+            <div class="field-wrap">
+              <input type="text" id="f_name" name="name" placeholder="Full Name" required autocomplete="name">
+              <span class="field-err">Please enter your full name.</span>
+            </div>
+            <div class="field-wrap">
+              <input type="email" id="f_email" name="email" placeholder="Business Email" required autocomplete="email">
+              <span class="field-err">Please enter a valid email.</span>
+            </div>
           </div>
-          <input type="text" placeholder="Company / Organization">
-          <select>
-            <option value="">🌍 Select Your Region</option>
-            <option>🇺🇸 USA</option>
-            <option>🇨🇦 Canada</option>
-            <option>🇬🇧 United Kingdom</option>
-            <option>🇩🇪 Germany / EU</option>
-            <option>Other Region</option>
-          </select>
-          <input type="text" placeholder="Service You're Interested In">
-          <textarea rows="4" placeholder="Tell us about your vision and goals..."></textarea>
+
+          <div class="field-wrap">
+            <input type="text" id="f_company" name="company" placeholder="Company / Organization" required>
+            <span class="field-err">Please enter your company name.</span>
+          </div>
+
+          <div class="field-wrap">
+            <input type="tel" id="f_phone" name="phone" placeholder="Phone Number (e.g. +1 647 123 4567)" required autocomplete="tel">
+            <span class="field-err">Please enter your phone number.</span>
+          </div>
+
+          <div class="field-wrap">
+            <select id="f_region" name="region" required>
+              <option value="">🌍 Select Your Region *</option>
+              <option value="USA">🇺🇸 USA</option>
+              <option value="Canada">🇨🇦 Canada</option>
+              <option value="UK">🇬🇧 United Kingdom</option>
+              <option value="EU">🇩🇪 Germany / EU</option>
+              <option value="Other">🌐 Other Region</option>
+            </select>
+            <span class="field-err">Please select your region.</span>
+          </div>
+
+          <div class="field-wrap">
+            <input type="text" id="f_service" name="service" placeholder="Service You're Interested In" required>
+            <span class="field-err">Please tell us which service you need.</span>
+          </div>
+
+          <div class="field-wrap">
+            <textarea id="f_message" name="message" rows="4" placeholder="Tell us about your vision and goals..." required></textarea>
+            <span class="field-err">Please describe your project or goals.</span>
+          </div>
+
           <div style="height:18px"></div>
-          <button class="btn" style="width:100%; font-size:1rem;">Schedule Free Strategy Call</button>
-        </div>
+          <button type="submit" class="btn" id="submitBtn" style="width:100%; font-size:1rem;">
+            <span id="btnText">Schedule Free Strategy Call</span>
+            <span id="btnLoader" style="display:none;">Sending…</span>
+          </button>
+          <p style="margin-top:16px; font-size:0.8rem; opacity:0.5;">All fields are required · Your data is kept private.</p>
+        </form>
 
         <div class="contact-sidebar">
           <h3>Your Local Team</h3>
@@ -913,9 +982,9 @@
             <div class="flag-chip">🇪🇺</div>
           </div>
           <ul class="contact-info-list">
-            <li><i class="fas fa-phone-alt"></i> +1 (415) 800 · GrowVanta</li>
+            <li><i class="fas fa-phone-alt"></i> 1 (647) 832-6357</li>
             <li><i class="fas fa-clock"></i> 24h Follow-the-sun coverage</li>
-            <li><i class="fas fa-envelope"></i> hello@growvantatech.com</li>
+            <li><i class="fas fa-envelope"></i> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="771f121b1b18371005180001161903160312141f5914181a">[email&#160;protected]</a></li>
             <li><i class="fas fa-check-circle"></i> GDPR & CCPA compliant</li>
             <li><i class="fas fa-check-circle"></i> Multilingual teams (EN, FR, DE)</li>
             <li><i class="fas fa-check-circle"></i> On-shore & near-shore options</li>
@@ -936,10 +1005,34 @@
         </div>
         <p>Premium IT infrastructure and digital experiences, delivered globally with precision and passion.</p>
         <div class="social-row">
-          <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-x-twitter"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+          <!-- LinkedIn -->
+          <a href="#" class="social-icon" aria-label="LinkedIn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="2" y="9" width="4" height="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <!-- X / Twitter -->
+          <a href="#" class="social-icon" aria-label="X (Twitter)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
+          <!-- GitHub -->
+          <a href="#" class="social-icon" aria-label="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+          </a>
+          <!-- Instagram -->
+          <a href="#" class="social-icon" aria-label="Instagram">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
         </div>
       </div>
       <div class="footer-col">
@@ -969,7 +1062,7 @@
     </div>
   </footer>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     /* ── Scroll progress ── */
     const prog = document.getElementById('progress');
     window.addEventListener('scroll', () => {
@@ -1034,10 +1127,186 @@
       });
     });
 
-    /* ── Pause animation on mobile (respect reduced motion) ── */
+    /* ── Pause animation on mobile (r
+    /* ── Pause animation if reduced motion ── */
     const track = document.getElementById('projTrack');
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (track && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       track.style.animation = 'none';
+    }
+
+
+    /* ══════════════════════════════════════
+       GOOGLE SHEETS FORM SUBMISSION
+    ══════════════════════════════════════ */
+    const SHEET_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+    const form = document.getElementById('contactForm');
+    if (form) {
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText  = document.getElementById('btnText');
+      const btnLoader = document.getElementById('btnLoader');
+      const formStatus = document.getElementById('formStatus');
+
+      /* ── Validate a single .field-wrap ── */
+      function validateField(wrap) {
+        const el = wrap.querySelector('input, textarea, select');
+        if (!el) return true;
+        let ok = el.value.trim() !== '';
+        if (el.type === 'email' && ok) ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+        wrap.classList.toggle('valid', ok);
+        wrap.classList.toggle('invalid', !ok);
+        return ok;
+      }
+
+      /* ── Live blur/input validation ── */
+      form.querySelectorAll('.field-wrap').forEach(wrap => {
+        const el = wrap.querySelector('input, textarea, select');
+        if (el) {
+          el.addEventListener('blur',  () => validateField(wrap));
+          el.addEventListener('input', () => { if (wrap.classList.contains('invalid')) validateField(wrap); });
+        }
+      });
+
+      /* ── Submit ── */
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const wraps = [...form.querySelectorAll('.field-wrap')];
+
+        /* Check if every field is empty (completely untouched form) */
+        const allEmpty = wraps.every(wrap => {
+          const el = wrap.querySelector('input, textarea, select');
+          return !el || el.value.trim() === '' || el.value === '';
+        });
+
+        if (allEmpty) {
+          formStatus.style.cssText = [
+            'display:block',
+            'background:rgba(255,165,0,0.12)',
+            'border:1px solid rgba(255,165,0,0.4)',
+            'color:#ffaa33',
+            'padding:14px 22px',
+            'border-radius:16px',
+            'margin-bottom:22px',
+            'font-size:0.92rem',
+            'font-weight:600',
+            'text-align:center',
+            'letter-spacing:0.2px'
+          ].join(';');
+          formStatus.textContent = "⚠️ Can't submit an empty form — please fill in your details first.";
+          form.querySelectorAll('input, textarea, select')[0]?.focus();
+          return;
+        }
+
+        /* Hide any previous status then validate field by field */
+        formStatus.style.display = 'none';
+        const allValid = wraps.map(validateField).every(Boolean);
+        if (!allValid) {
+          const firstBad = form.querySelector('.field-wrap.invalid input, .field-wrap.invalid select, .field-wrap.invalid textarea');
+          if (firstBad) firstBad.focus();
+          return;
+        }
+
+        submitBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnLoader.style.display = 'inline';
+
+        const payload = {
+          timestamp: new Date().toISOString(),
+          name:    form.f_name.value.trim(),
+          email:   form.f_email.value.trim(),
+          company: form.f_company.value.trim(),
+          phone:   form.f_phone.value.trim(),
+          region:  form.f_region.value,
+          service: form.f_service.value.trim(),
+          message: form.f_message.value.trim()
+        };
+
+        try {
+          await fetch(SHEET_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          /* ── Thank You screen ── */
+          const firstName = payload.name.split(' ')[0];
+          form.innerHTML = `
+            <div style="text-align:center;padding:20px 10px 10px;">
+              <div style="
+                width:84px;height:84px;border-radius:50%;
+                background:linear-gradient(135deg,rgba(62,207,114,0.18),rgba(43,108,158,0.18));
+                border:2px solid #3ecf72;
+                display:flex;align-items:center;justify-content:center;
+                margin:0 auto 30px;
+                animation:popIn .55s cubic-bezier(.2,1.4,.4,1) both;
+              ">
+                <svg width="38" height="38" viewBox="0 0 24 24" fill="none"
+                  stroke="#3ecf72" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <h3 style="font-size:2rem;margin-bottom:14px;font-family:'Plus Jakarta Sans',sans-serif;">
+                Thank you, ${firstName}! 🎉
+              </h3>
+              <p style="color:#8fa3cc;font-size:1rem;line-height:1.75;max-width:400px;margin:0 auto 10px;">
+                Your message is on its way. We'll reach out to
+                <strong style="color:#e8eeff;">${payload.email}</strong>
+                within <strong style="color:#3ecf72;">4 hours</strong>.
+              </p>
+              <p style="color:#8fa3cc;font-size:0.88rem;margin-bottom:38px;">
+                Can't wait? Give us a call right now.
+              </p>
+              <a href="tel:+16478326357" style="
+                display:inline-flex;align-items:center;gap:10px;
+                padding:14px 32px;border-radius:100px;
+                border:1px solid rgba(212,175,55,0.45);
+                color:#d4af37;font-weight:600;font-size:0.95rem;
+                text-decoration:none;
+                font-family:'Plus Jakarta Sans',sans-serif;
+                background:rgba(212,175,55,0.08);
+                transition:background .3s;
+              "
+              onmouseover="this.style.background='rgba(212,175,55,0.18)'"
+              onmouseout="this.style.background='rgba(212,175,55,0.08)'">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2
+                    19.79 19.79 0 0 1-8.63-3.07
+                    A19.5 19.5 0 0 1 4.15 12
+                    19.79 19.79 0 0 1 1.08 3.33
+                    A2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72
+                    c.127.96.361 1.903.7 2.81
+                    a2 2 0 0 1-.45 2.11L7.09 8.91
+                    a16 16 0 0 0 6 6l1.27-1.27
+                    a2 2 0 0 1 2.11-.45
+                    c.907.339 1.85.573 2.81.7
+                    A2 2 0 0 1 21 16z"/>
+                </svg>
+                +1 (647) 832-6357
+              </a>
+            </div>
+          `;
+
+        } catch (err) {
+          formStatus.style.cssText = [
+            'display:block',
+            'background:rgba(255,85,85,0.12)',
+            'border:1px solid rgba(255,85,85,0.35)',
+            'color:#ff7b7b',
+            'padding:14px 20px',
+            'border-radius:16px',
+            'margin-bottom:22px',
+            'font-size:.9rem',
+            'font-weight:500'
+          ].join(';');
+          formStatus.textContent = '\u2717 Something went wrong. Please try again or call us directly.';
+          submitBtn.disabled = false;
+          btnText.style.display  = 'inline';
+          btnLoader.style.display = 'none';
+        }
+      });
     }
   </script>
 </body>
