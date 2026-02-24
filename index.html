@@ -1136,178 +1136,178 @@
 
 
     /* ══════════════════════════════════════
-       GOOGLE SHEETS FORM SUBMISSION
-    ══════════════════════════════════════ */
-    const SHEET_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+     GOOGLE SHEETS FORM SUBMISSION (CORS SAFE)
+  ══════════════════════════════════════ */
 
-    const form = document.getElementById('contactForm');
-    if (form) {
-      const submitBtn = document.getElementById('submitBtn');
-      const btnText  = document.getElementById('btnText');
-      const btnLoader = document.getElementById('btnLoader');
-      const formStatus = document.getElementById('formStatus');
+      const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwyD3UX567ZK2nDq5-HiLeWg21knCZxDSZH0O5kQu408XtcMjc84Rx5xwwjCACGcw3F0w/exec';
 
-      /* ── Validate a single .field-wrap ── */
-      function validateField(wrap) {
-        const el = wrap.querySelector('input, textarea, select');
-        if (!el) return true;
-        let ok = el.value.trim() !== '';
-        if (el.type === 'email' && ok) ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
-        wrap.classList.toggle('valid', ok);
-        wrap.classList.toggle('invalid', !ok);
-        return ok;
-      }
+      const form = document.getElementById('contactForm');
 
-      /* ── Live blur/input validation ── */
-      form.querySelectorAll('.field-wrap').forEach(wrap => {
-        const el = wrap.querySelector('input, textarea, select');
-        if (el) {
-          el.addEventListener('blur',  () => validateField(wrap));
-          el.addEventListener('input', () => { if (wrap.classList.contains('invalid')) validateField(wrap); });
-        }
-      });
+      if (form) {
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        const formStatus = document.getElementById('formStatus');
 
-      /* ── Submit ── */
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const wraps = [...form.querySelectorAll('.field-wrap')];
-
-        /* Check if every field is empty (completely untouched form) */
-        const allEmpty = wraps.every(wrap => {
+        /* ── Validate single field ── */
+        function validateField(wrap) {
           const el = wrap.querySelector('input, textarea, select');
-          return !el || el.value.trim() === '' || el.value === '';
+          if (!el) return true;
+
+          let ok = el.value.trim() !== '';
+
+          if (el.type === 'email' && ok) {
+            ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+          }
+
+          wrap.classList.toggle('valid', ok);
+          wrap.classList.toggle('invalid', !ok);
+          return ok;
+        }
+
+        /* ── Live validation ── */
+        form.querySelectorAll('.field-wrap').forEach(wrap => {
+          const el = wrap.querySelector('input, textarea, select');
+          if (el) {
+            el.addEventListener('blur', () => validateField(wrap));
+            el.addEventListener('input', () => {
+              if (wrap.classList.contains('invalid')) validateField(wrap);
+            });
+          }
         });
 
-        if (allEmpty) {
-          formStatus.style.cssText = [
-            'display:block',
-            'background:rgba(255,165,0,0.12)',
-            'border:1px solid rgba(255,165,0,0.4)',
-            'color:#ffaa33',
-            'padding:14px 22px',
-            'border-radius:16px',
-            'margin-bottom:22px',
-            'font-size:0.92rem',
-            'font-weight:600',
-            'text-align:center',
-            'letter-spacing:0.2px'
-          ].join(';');
-          formStatus.textContent = "⚠️ Can't submit an empty form — please fill in your details first.";
-          form.querySelectorAll('input, textarea, select')[0]?.focus();
-          return;
-        }
+        /* ── Submit ── */
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
 
-        /* Hide any previous status then validate field by field */
-        formStatus.style.display = 'none';
-        const allValid = wraps.map(validateField).every(Boolean);
-        if (!allValid) {
-          const firstBad = form.querySelector('.field-wrap.invalid input, .field-wrap.invalid select, .field-wrap.invalid textarea');
-          if (firstBad) firstBad.focus();
-          return;
-        }
+          const wraps = [...form.querySelectorAll('.field-wrap')];
 
-        submitBtn.disabled = true;
-        btnText.style.display = 'none';
-        btnLoader.style.display = 'inline';
-
-        const payload = {
-          timestamp: new Date().toISOString(),
-          name:    form.f_name.value.trim(),
-          email:   form.f_email.value.trim(),
-          company: form.f_company.value.trim(),
-          phone:   form.f_phone.value.trim(),
-          region:  form.f_region.value,
-          service: form.f_service.value.trim(),
-          message: form.f_message.value.trim()
-        };
-
-        try {
-          await fetch(SHEET_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+          const allEmpty = wraps.every(wrap => {
+            const el = wrap.querySelector('input, textarea, select');
+            return !el || el.value.trim() === '';
           });
 
-          /* ── Thank You screen ── */
-          const firstName = payload.name.split(' ')[0];
-          form.innerHTML = `
-            <div style="text-align:center;padding:20px 10px 10px;">
-              <div style="
-                width:84px;height:84px;border-radius:50%;
-                background:linear-gradient(135deg,rgba(62,207,114,0.18),rgba(43,108,158,0.18));
-                border:2px solid #3ecf72;
-                display:flex;align-items:center;justify-content:center;
-                margin:0 auto 30px;
-                animation:popIn .55s cubic-bezier(.2,1.4,.4,1) both;
-              ">
-                <svg width="38" height="38" viewBox="0 0 24 24" fill="none"
-                  stroke="#3ecf72" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              </div>
-              <h3 style="font-size:2rem;margin-bottom:14px;font-family:'Plus Jakarta Sans',sans-serif;">
-                Thank you, ${firstName}! 🎉
-              </h3>
-              <p style="color:#8fa3cc;font-size:1rem;line-height:1.75;max-width:400px;margin:0 auto 10px;">
-                Your message is on its way. We'll reach out to
-                <strong style="color:#e8eeff;">${payload.email}</strong>
-                within <strong style="color:#3ecf72;">4 hours</strong>.
-              </p>
-              <p style="color:#8fa3cc;font-size:0.88rem;margin-bottom:38px;">
-                Can't wait? Give us a call right now.
-              </p>
-              <a href="tel:+16478326357" style="
-                display:inline-flex;align-items:center;gap:10px;
-                padding:14px 32px;border-radius:100px;
-                border:1px solid rgba(212,175,55,0.45);
-                color:#d4af37;font-weight:600;font-size:0.95rem;
-                text-decoration:none;
-                font-family:'Plus Jakarta Sans',sans-serif;
-                background:rgba(212,175,55,0.08);
-                transition:background .3s;
-              "
-              onmouseover="this.style.background='rgba(212,175,55,0.18)'"
-              onmouseout="this.style.background='rgba(212,175,55,0.08)'">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2
-                    19.79 19.79 0 0 1-8.63-3.07
-                    A19.5 19.5 0 0 1 4.15 12
-                    19.79 19.79 0 0 1 1.08 3.33
-                    A2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72
-                    c.127.96.361 1.903.7 2.81
-                    a2 2 0 0 1-.45 2.11L7.09 8.91
-                    a16 16 0 0 0 6 6l1.27-1.27
-                    a2 2 0 0 1 2.11-.45
-                    c.907.339 1.85.573 2.81.7
-                    A2 2 0 0 1 21 16z"/>
-                </svg>
-                +1 (647) 832-6357
-              </a>
-            </div>
-          `;
+          if (allEmpty) {
+            formStatus.style.cssText = `
+        display:block;
+        background:rgba(255,165,0,0.12);
+        border:1px solid rgba(255,165,0,0.4);
+        color:#ffaa33;
+        padding:14px 22px;
+        border-radius:16px;
+        margin-bottom:22px;
+        font-size:0.92rem;
+        font-weight:600;
+        text-align:center;
+      `;
+            formStatus.textContent =
+              "⚠️ Can't submit an empty form — please fill in your details first.";
+            form.querySelector('input, textarea, select')?.focus();
+            return;
+          }
 
-        } catch (err) {
-          formStatus.style.cssText = [
-            'display:block',
-            'background:rgba(255,85,85,0.12)',
-            'border:1px solid rgba(255,85,85,0.35)',
-            'color:#ff7b7b',
-            'padding:14px 20px',
-            'border-radius:16px',
-            'margin-bottom:22px',
-            'font-size:.9rem',
-            'font-weight:500'
-          ].join(';');
-          formStatus.textContent = '\u2717 Something went wrong. Please try again or call us directly.';
-          submitBtn.disabled = false;
-          btnText.style.display  = 'inline';
-          btnLoader.style.display = 'none';
-        }
-      });
-    }
+          formStatus.style.display = 'none';
+
+          const allValid = wraps.map(validateField).every(Boolean);
+          if (!allValid) {
+            const firstBad = form.querySelector(
+              '.field-wrap.invalid input, .field-wrap.invalid select, .field-wrap.invalid textarea'
+            );
+            if (firstBad) firstBad.focus();
+            return;
+          }
+
+          submitBtn.disabled = true;
+          btnText.style.display = 'none';
+          btnLoader.style.display = 'inline';
+
+          const payload = {
+            name: form.f_name.value.trim(),
+            email: form.f_email.value.trim(),
+            company: form.f_company.value.trim(),
+            phone: form.f_phone.value.trim(),
+            region: form.f_region.value,
+            service: form.f_service.value.trim(),
+            message: form.f_message.value.trim()
+          };
+
+          try {
+            /* ---- IMPORTANT: NO HEADERS, NO JSON ---- */
+            const formData = new URLSearchParams(payload);
+
+            await fetch(SHEET_URL, {
+              method: 'POST',
+              body: formData
+            });
+
+            /* ── Thank You Screen ── */
+            const firstName = payload.name.split(' ')[0];
+
+            form.innerHTML = `
+        <div style="text-align:center;padding:20px 10px 10px;">
+          <div style="
+            width:84px;height:84px;border-radius:50%;
+            background:linear-gradient(135deg,rgba(62,207,114,0.18),rgba(43,108,158,0.18));
+            border:2px solid #3ecf72;
+            display:flex;align-items:center;justify-content:center;
+            margin:0 auto 30px;
+          ">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none"
+              stroke="#3ecf72" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+
+          <h3 style="font-size:2rem;margin-bottom:14px;">
+            Thank you, ${firstName}! 🎉
+          </h3>
+
+          <p style="color:#8fa3cc;font-size:1rem;line-height:1.75;max-width:400px;margin:0 auto 10px;">
+            Your message is on its way. We'll reach out to
+            <strong style="color:#e8eeff;">${payload.email}</strong>
+            within <strong style="color:#3ecf72;">4 hours</strong>.
+          </p>
+
+          <p style="color:#8fa3cc;font-size:0.88rem;margin-bottom:38px;">
+            Can't wait? Give us a call right now.
+          </p>
+
+          <a href="tel:+16478326357" style="
+            display:inline-flex;align-items:center;gap:10px;
+            padding:14px 32px;border-radius:100px;
+            border:1px solid rgba(212,175,55,0.45);
+            color:#d4af37;font-weight:600;font-size:0.95rem;
+            text-decoration:none;
+            background:rgba(212,175,55,0.08);
+          ">
+            +1 (647) 832-6357
+          </a>
+        </div>
+      `;
+
+          } catch (err) {
+
+            formStatus.style.cssText = `
+        display:block;
+        background:rgba(255,85,85,0.12);
+        border:1px solid rgba(255,85,85,0.35);
+        color:#ff7b7b;
+        padding:14px 20px;
+        border-radius:16px;
+        margin-bottom:22px;
+        font-size:.9rem;
+        font-weight:500;
+      `;
+
+            formStatus.textContent =
+              '✗ Something went wrong. Please try again or call us directly.';
+
+            submitBtn.disabled = false;
+            btnText.style.display = 'inline';
+            btnLoader.style.display = 'none';
+          }
+        });
+      }
   </script>
 </body>
 </html>
