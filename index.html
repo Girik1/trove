@@ -1545,13 +1545,37 @@ function updateSlider() {
 budgetRange.addEventListener('input', updateSlider);
 updateSlider();
 
-// ─── FORM SUBMIT ──────────────────────────
+// ─── FORM SUBMIT ─────────────────────────
+const scriptURL = "https://script.google.com/macros/s/AKfycbzzwxWEaW2FzSy8eNKExUjfNZ9iJhQRgfSzViMSEJTioX6imPDQdkdY38zICmuXTkUt/exec";
+
 function handleSubmit(e) {
   e.preventDefault();
-  const btn = e.target.querySelector('button[type=submit]');
-  btn.textContent = '✓ Sent! We\'ll be in touch.';
-  btn.style.background = 'linear-gradient(135deg,#2d8a4e,#1a6035)';
-  setTimeout(() => { btn.textContent = 'Send Message →'; btn.style.background = ''; e.target.reset(); updateSlider(); }, 4000);
+
+  const form = e.target;
+
+  const data = {
+    name: form.querySelector('input[type="text"]').value,
+    email: form.querySelector('input[type="email"]').value,
+    phone: form.querySelector('input[type="tel"]').value,
+    country: form.querySelector('select[required]').value,
+    service: form.querySelectorAll('select')[1].value,
+    budget: document.getElementById('budgetRange').value,
+    message: form.querySelector('textarea').value
+  };
+
+  fetch(scriptURL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(response => {
+    alert("Message sent successfully!");
+    form.reset();
+  })
+  .catch(error => {
+    alert("Something went wrong.");
+    console.error(error);
+  });
 }
 
 // ─── MODALS ───────────────────────────────
@@ -1678,3 +1702,4 @@ document.querySelectorAll('.faq-q').forEach(q => {
 </script>
 </body>
 </html>
+
